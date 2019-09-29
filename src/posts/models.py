@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.db.models.signals import pre_save
 from django.utils import timezone
@@ -42,7 +42,7 @@ def upload_location(instance, filename):
     return "%s/%s" %(new_id, filename)
 
 class Post(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1, on_delete=models.CASCADE)
     title = models.CharField(max_length=120)
     slug = models.SlugField(unique=True)
     image = models.ImageField(upload_to=upload_location, 
@@ -68,7 +68,10 @@ class Post(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse("posts:detail", kwargs={"slug": self.slug})
+        return reverse("detail", kwargs={"slug": self.slug})
+
+    def get_api_url(self):
+        return reverse("detail_api", kwargs={"slug": self.slug})
 
     class Meta:
         ordering = ["-timestamp", "-updated"]
